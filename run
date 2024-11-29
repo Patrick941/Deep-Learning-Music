@@ -1,0 +1,28 @@
+#!/bin/bash
+basepath=inputs/finalAssignment_musicDataset
+
+mkdir -p temp
+
+python scripts/data_preprocess.py --path $basepath/inputMelodiesAugmented.txt --pitch-path temp/pitch.txt --timing-path temp/timing.txt --unaltered-path temp/unaltered.txt
+
+for i in {1..3}; do
+    modelPath=Models/model_melodies_$i
+    python gpt.py --path temp/pitch.txt --parameters $i --model-path $modelPath --log-path Logs/result_melodies_pitch_$i.log --melody-path $basepath/melody_pitch_$i.txt --data-type pitch
+    python gpt.py --path temp/timing.txt --parameters $i --model-path $modelPath --log-path Logs/result_melodies_timing_$i.log --melody-path $basepath/melody_timing_$i.txt --data-type timing
+    python gpt.py --path temp/unaltered.txt --parameters $i --model-path $modelPath --log-path Logs/result_melodies_$i.log --melody-path $basepath/melody_$i.txt --data-type both
+done
+
+LowestLost=100000000
+bestIndex=-1
+for i in {1..3}; do
+    loss=$(tail -n 1 Logs/result_melodies_$i.log | awk '{print $NF}')
+    if (( $(awk "BEGIN {print ($loss < $LowestLost)}") )); then
+        LowestLost=$loss
+        bestIndex=$i
+        BestModel=Models/model_melodies_$i
+    fi
+done
+
+mv $basepath/melody_$bestIndex.txt $basepath/melody_best.txt
+
+rm -rf temp
