@@ -140,4 +140,8 @@ for metric in csv_headers[1:]:
     
     plt.bar(non_zero_keys, non_zero_values)
     plt.title(metric)
+    plt.xlabel('Output Files')
+    plt.ylabel(metric)
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
     plt.savefig(f'images/{metric}.png')

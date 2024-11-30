@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
@@ -5,6 +8,7 @@ from torch.nn import Parameter
 import sys
 import argparse
 import os
+import warnings
 
 parser = argparse.ArgumentParser(description='GPT Language Model')
 parser.add_argument('--path', type=str, help='Path to the input file')
@@ -37,46 +41,93 @@ dropout = 0.2
 
 # Hyperparameters set 1
 if args.parameters == 1:
-    batch_size = 128
-    block_size = 16
-    max_iters = 500
-    eval_interval = 50
-    learning_rate = 2e-4
+    batch_size = 32
+    block_size = 4
+    max_iters = 100
+    eval_interval = 10
+    learning_rate = 1e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 20
-    n_embd = 128
-    n_head = 4 
-    n_layer = 4 
+    eval_iters = 5
+    n_embd = 32
+    n_head = 1
+    n_layer = 1
     dropout = 0.05
 # ------------
 
 # Hyperparameters set 2
 if args.parameters == 2:
-    batch_size = 128
-    block_size = 64
-    max_iters = 500
-    eval_interval = 50
-    learning_rate = 2e-4
+    batch_size = 32
+    block_size = 16
+    max_iters = 100
+    eval_interval = 10
+    learning_rate = 1e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 20
-    n_embd = 128
-    n_head = 3
-    n_layer = 3
+    eval_iters = 5
+    n_embd = 32
+    n_head = 1
+    n_layer = 1
     dropout = 0.05
 
 # Hyperparameters set 3
 if args.parameters == 3:
-    batch_size = 128
-    block_size = 32
-    max_iters = 500
-    eval_interval = 50
-    learning_rate = 2e-4
+    batch_size = 32
+    block_size = 8
+    max_iters = 100
+    eval_interval = 10
+    learning_rate = 1e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 50
-    n_embd = 172
-    n_head = 2
-    n_layer = 2
+    eval_iters = 10
+    n_embd = 64
+    n_head = 1
+    n_layer = 1
     dropout = 0.05
+    
+# Hyperparameters set 4
+if args.parameters == 4:
+    batch_size = 8
+    block_size = 2
+    max_iters = 50
+    eval_interval = 5
+    learning_rate = 5e-5
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    eval_iters = 5
+    n_embd = 16
+    n_head = 1
+    n_layer = 1
+    dropout = 0.05
+    
+# Hyperparameters set 5
+if args.parameters == 5:
+    batch_size = 4
+    block_size = 8
+    max_iters = 50
+    eval_interval = 5
+    learning_rate = 5e-5
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    eval_iters = 5
+    n_embd = 16
+    n_head = 1
+    n_layer = 1
+    dropout = 0.05
+    
+# Hyperparameters set 6
+if args.parameters == 6:
+    batch_size = 2
+    block_size = 4
+    max_iters = 50
+    eval_interval = 5
+    learning_rate = 5e-5
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    eval_iters = 5
+    n_embd = 8
+    n_head = 1
+    n_layer = 1
+    dropout = 0.05
+
+
+    
+if args.data_type == "fine_tune":
+    learning_rate *= 0.5
 
 def add_noise(data, chars):
     augmented = []
@@ -261,10 +312,7 @@ class GPTLanguageModel(nn.Module):
             B, T, C = logits.shape
             logits = logits.view(B*T, C)
             targets = targets.view(B*T)
-            if args.data_type != 'timing':
-                loss = F.cosine_embedding_loss(logits, F.one_hot(targets, num_classes=vocab_size).float(), torch.ones(logits.size(0), device=device))
-            else:
-                loss = F.cross_entropy(logits, targets)
+            loss = F.cross_entropy(logits, targets)
 
         return logits, loss
 
@@ -279,7 +327,7 @@ class GPTLanguageModel(nn.Module):
             logits = logits[:, -1, :] # becomes (B, C)
             
             # Add temperature to the logits
-            logits /= 2
+            logits /= 1.25
             
             # apply softmax to get probabilities
             probs = F.softmax(logits, dim=-1) # (B, C)
@@ -295,7 +343,7 @@ if args.no_train == None:
     model = GPTLanguageModel()
     
     
-    if os.path.exists(args.model_path) and args.data_type != "pitch":
+    if os.path.exists(args.model_path) and args.data_type == "fine_tune":
         print(f"Loading model from {args.model_path}...")
         # Load state_dict
         checkpoint = torch.load(args.model_path)

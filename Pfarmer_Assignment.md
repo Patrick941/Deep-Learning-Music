@@ -19,6 +19,8 @@ Reduced dropout as rhytms are less complex
 Sounded too similar to input so increased temperature and added noise to improve generalisation
 Added pattern stretch and shrink to improve generalisation and torch cat all datasets together
 Added 1D convolution layers before Transformer blocks to extract local rhythm patterns
+Evaluation
+Separation perhaps more useful if more complex rhythms
 
 ### Data Preprocessing and feature engineering
 

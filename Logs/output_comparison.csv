@@ -1,7 +1,19 @@
 File,Character Distribution Distance,Pattern Distribution Distance,Pattern Length Distribution Distance,Pattern Recall,Pattern Precision,Pattern F1 Score
-melody_1.txt,0.1276,0.8425,0.2110,0.8525,0.9044,0.8777
-melody_2.txt,0.1087,0.9000,0.2446,0.8525,0.9059,0.8784
-melody_3.txt,0.1442,0.8407,0.2193,0.8338,0.9088,0.8697
-melody_1_baseline.txt,1.8381,1.0000,0.4073,0.0000,0.0000,0.0000
-melody_2_baseline.txt,1.8381,1.0000,0.4073,0.0000,0.0000,0.0000
-melody_3_baseline.txt,1.8381,1.0000,0.4073,0.0000,0.0000,0.0000
+melody_no_aug_1.txt,0.1293,0.8855,0.2162,0.8430,0.9023,0.8716
+melody_no_aug_2.txt,0.1359,0.8840,0.2144,0.8354,0.9034,0.8680
+melody_no_aug_3.txt,0.1138,0.7675,0.1371,0.8270,0.9139,0.8683
+melody_no_aug_4.txt,0.1308,0.9663,0.2573,0.8510,0.8974,0.8735
+melody_no_aug_5.txt,0.1392,0.9707,0.2615,0.8502,0.8933,0.8712
+melody_no_aug_6.txt,0.1316,0.9703,0.2637,0.8494,0.8983,0.8732
+melody_multiplied_1.txt,0.4086,1.0748,1.1924,0.3882,0.9265,0.5472
+melody_multiplied_2.txt,0.3904,1.0634,1.1647,0.4015,0.9255,0.5601
+melody_multiplied_3.txt,0.4114,0.9706,0.8793,0.5399,0.9379,0.6853
+melody_multiplied_4.txt,0.3494,1.1306,1.3952,0.2935,0.9072,0.4436
+melody_multiplied_5.txt,0.3410,1.1322,1.4037,0.2791,0.9051,0.4266
+melody_multiplied_6.txt,0.3489,1.1343,1.4178,0.2711,0.9083,0.4176
+melody_fine_tune_1.txt,0.1276,0.8726,0.2255,0.8376,0.9047,0.8699
+melody_fine_tune_2.txt,0.1276,0.8486,0.2117,0.8361,0.9031,0.8683
+melody_fine_tune_3.txt,0.1148,0.7494,0.1451,0.8118,0.9136,0.8597
+melody_fine_tune_4.txt,0.1508,0.9572,0.2555,0.8510,0.8974,0.8735
+melody_fine_tune_5.txt,0.1439,0.9634,0.2582,0.8479,0.8967,0.8716
+melody_fine_tune_6.txt,0.1424,0.9671,0.2652,0.8487,0.8942,0.8709

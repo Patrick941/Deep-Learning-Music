@@ -3,30 +3,55 @@ basepath=inputs/finalAssignment_musicDataset
 
 mkdir -p temp
 
-python scripts/data_preprocess.py --path $basepath/inputMelodiesAugmented.txt --pitch-path temp/pitch.txt --timing-path temp/timing.txt --unaltered-path temp/unaltered.txt
+range=6
 
-for i in {1..3}; do
+python scripts/data_preprocess.py --path $basepath/inputMelodiesAugmented.txt --pitch-path temp/pitch.txt --timing-path temp/timing.txt --interleaved-path temp/interleaved.txt --unaltered-path temp/unaltered.txt
+
+for i in $(seq 1 $range); do
     modelPath=Models/model_melodies_$i
+    rm -rf $modelPath
     python gpt.py --path temp/pitch.txt --parameters $i --model-path $modelPath --log-path Logs/result_melodies_pitch_$i.log --melody-path $basepath/melody_pitch_$i.txt --data-type pitch
+    python gpt.py --path temp/unaltered.txt --parameters $i --model-path $modelPath --log-path Logs/result_melodies_fine_tune_$i.log --melody-path $basepath/melody_fine_tune_$i.txt --data-type fine_tune
     python gpt.py --path temp/timing.txt --parameters $i --model-path $modelPath --log-path Logs/result_melodies_timing_$i.log --melody-path $basepath/melody_timing_$i.txt --data-type timing
-    python gpt.py --path temp/unaltered.txt --parameters $i --model-path $modelPath --log-path Logs/result_melodies_$i.log --melody-path $basepath/melody_$i.txt --data-type both
+    
+
+    python scripts/combine.py --pitch $basepath/melody_pitch_$i.txt --timing $basepath/melody_timing_$i.txt --output $basepath/melody_multiplied_$i.txt
+
+    #python gpt.py --path temp/interleaved.txt --parameters $i --model-path $modelPath --log-path Logs/result_melodies_interleaved_$i.log --melody-path $basepath/melody_interleaved_$i.txt --data-type both
+
+    #python scripts/postprocess.py --path $basepath/melody_interleaved_$i.txt
 done
 
-LowestLost=100000000
-bestIndex=-1
-for i in {1..3}; do
-    loss=$(tail -n 1 Logs/result_melodies_$i.log | awk '{print $NF}')
-    if (( $(awk "BEGIN {print ($loss < $LowestLost)}") )); then
-        LowestLost=$loss
-        bestIndex=$i
-        BestModel=Models/model_melodies_$i
-    fi
+for i in $(seq 1 $range); do
+    modelPath=Models/model_melodies_no_aug_$i
+    rm -rf $modelPath
+    python gpt.py --path temp/unaltered.txt --parameters $i --model-path $modelPath --log-path Logs/result_melodies_no_aug_$i.log --melody-path $basepath/melody_no_aug_$i.txt --data-type both
 done
 
-cp $basepath/melody_$bestIndex.txt $basepath/melody_best.txt
+# LowestLost=100000000
+# bestIndex=-1
+# for i in $(seq 1 $range); do
+#     loss=$(tail -n 1 Logs/result_melodies_$i.log | awk '{print $NF}')
+#     if (( $(awk "BEGIN {print ($loss < $LowestLost)}") )); then
+#         LowestLost=$loss
+#         bestIndex=$i
+#         BestModel=Models/model_melodies_$i
+#     fi
+# done
+#cp $basepath/melody_$bestIndex.txt $basepath/melody_best.txt
 
-echo "python scripts/output_comparison.py --truth temp/unaltered.txt --outputs $basepath/melody_1.txt $basepath/melody_2.txt $basepath/melody_3.txt $basepath/melody_1_baseline.txt $basepath/melody_2_baseline.txt $basepath/melody_3_baseline.txt --output-csv Logs/output_comparison.csv"
+melodies="melody_no_aug_ melody_multiplied_ melody_fine_tune_" 
+output_files=""
 
-python scripts/output_comparison.py --truth temp/unaltered.txt --outputs $basepath/melody_1.txt $basepath/melody_2.txt $basepath/melody_3.txt $basepath/melody_1_baseline.txt $basepath/melody_2_baseline.txt $basepath/melody_3_baseline.txt --output-csv Logs/output_comparison.csv
+for melody in $melodies; do
+    for i in $(seq 1 $range); do
+        output_files="$output_files $basepath/$melody$i.txt"
+    done
+done
+
+
+echo "python scripts/output_comparison.py --truth temp/unaltered.txt --outputs $output_files --output-csv Logs/output_comparison.csv"
+
+python scripts/output_comparison.py --truth temp/unaltered.txt --outputs $output_files --output-csv Logs/output_comparison.csv
 
 rm -rf temp
