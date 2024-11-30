@@ -23,8 +23,10 @@ for i in {1..3}; do
     fi
 done
 
-mv $basepath/melody_$bestIndex.txt $basepath/melody_best.txt
+cp $basepath/melody_$bestIndex.txt $basepath/melody_best.txt
 
-python scripts/output_comparison.py --truth temp/unaltered.txt --output-1 $basepath/melody_1.txt --output-2 $basepath/melody_2.txt --output-3 $basepath/melody_3.txt --output-csv Logs/output_comparison.csv
+echo "python scripts/output_comparison.py --truth temp/unaltered.txt --outputs $basepath/melody_1.txt $basepath/melody_2.txt $basepath/melody_3.txt $basepath/melody_1_baseline.txt $basepath/melody_2_baseline.txt $basepath/melody_3_baseline.txt --output-csv Logs/output_comparison.csv"
+
+python scripts/output_comparison.py --truth temp/unaltered.txt --outputs $basepath/melody_1.txt $basepath/melody_2.txt $basepath/melody_3.txt $basepath/melody_1_baseline.txt $basepath/melody_2_baseline.txt $basepath/melody_3_baseline.txt --output-csv Logs/output_comparison.csv
 
 rm -rf temp

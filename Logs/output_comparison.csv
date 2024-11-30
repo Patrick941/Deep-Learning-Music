@@ -1,0 +1,7 @@
+File,Character Distribution Distance,Pattern Distribution Distance,Pattern Length Distribution Distance,Pattern Recall,Pattern Precision,Pattern F1 Score
+melody_1.txt,0.1276,0.8425,0.2110,0.8525,0.9044,0.8777
+melody_2.txt,0.1087,0.9000,0.2446,0.8525,0.9059,0.8784
+melody_3.txt,0.1442,0.8407,0.2193,0.8338,0.9088,0.8697
+melody_1_baseline.txt,1.8381,1.0000,0.4073,0.0000,0.0000,0.0000
+melody_2_baseline.txt,1.8381,1.0000,0.4073,0.0000,0.0000,0.0000
+melody_3_baseline.txt,1.8381,1.0000,0.4073,0.0000,0.0000,0.0000

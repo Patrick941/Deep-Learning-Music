@@ -43,7 +43,7 @@ if args.parameters == 1:
     eval_interval = 50
     learning_rate = 2e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 200
+    eval_iters = 20
     n_embd = 128
     n_head = 4 
     n_layer = 4 
@@ -58,7 +58,7 @@ if args.parameters == 2:
     eval_interval = 50
     learning_rate = 2e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 200
+    eval_iters = 20
     n_embd = 128
     n_head = 3
     n_layer = 3
@@ -72,7 +72,7 @@ if args.parameters == 3:
     eval_interval = 50
     learning_rate = 2e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 500
+    eval_iters = 50
     n_embd = 172
     n_head = 2
     n_layer = 2
@@ -358,6 +358,17 @@ if args.no_train == None:
     # Save the model
     torch.save(model.state_dict(), args.model_path)
     print(f"Model saved to {args.model_path}")
+    
+    most_frequent_char = max(set(text), key=text.count)
+    most_frequent_char_idx = stoi[most_frequent_char]
+    
+    baseline_path = args.melody_path.replace('.txt', '_baseline.txt')
+
+    with open(baseline_path, 'w') as f:
+        baseline_context = torch.zeros((1, 1), dtype=torch.long, device=device).fill_(most_frequent_char_idx)
+        baseline_generated_text = decode([baseline_context.squeeze().item()])
+        with open(args.melody_path.replace('.txt', '_baseline.txt'), 'w') as f:
+            f.write(baseline_generated_text)
 
 
 

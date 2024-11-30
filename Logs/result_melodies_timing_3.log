@@ -1,13 +1,13 @@
 1.196446 M parameters
 Vocabulary size: 10
-step 0: train loss 1.9019, val loss 1.8287
-step 50: train loss 0.9267, val loss 0.6821
-step 100: train loss 0.9017, val loss 0.6293
-step 150: train loss 0.8881, val loss 0.6050
-step 200: train loss 0.8849, val loss 0.6186
-step 250: train loss 0.8834, val loss 0.5877
-step 300: train loss 0.8826, val loss 0.5900
-step 350: train loss 0.8780, val loss 0.5773
-step 400: train loss 0.8784, val loss 0.5731
-step 450: train loss 0.8736, val loss 0.5631
-step 499: train loss 0.8718, val loss 0.5579
+step 0: train loss 1.9053, val loss 1.8288
+step 50: train loss 0.9227, val loss 0.6837
+step 100: train loss 0.8994, val loss 0.6311
+step 150: train loss 0.8977, val loss 0.6148
+step 200: train loss 0.8849, val loss 0.5894
+step 250: train loss 0.8827, val loss 0.5952
+step 300: train loss 0.8790, val loss 0.6029
+step 350: train loss 0.8864, val loss 0.5856
+step 400: train loss 0.8831, val loss 0.5847
+step 450: train loss 0.8744, val loss 0.5667
+step 499: train loss 0.8681, val loss 0.5555
