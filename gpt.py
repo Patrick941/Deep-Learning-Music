@@ -37,46 +37,63 @@ dropout = 0.2
 
 # Hyperparameters set 1
 if args.parameters == 1:
-    batch_size = 64
-    block_size = 64
-    max_iters = 3000
-    eval_interval = 300
+    batch_size = 128
+    block_size = 16
+    max_iters = 500
+    eval_interval = 50
     learning_rate = 2e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     eval_iters = 200
     n_embd = 128
     n_head = 4 
     n_layer = 4 
-    dropout = 0.1
+    dropout = 0.05
 # ------------
 
 # Hyperparameters set 2
 if args.parameters == 2:
-    batch_size = 64
-    block_size = 128
-    max_iters = 3000
-    eval_interval = 300
+    batch_size = 128
+    block_size = 64
+    max_iters = 500
+    eval_interval = 50
     learning_rate = 2e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     eval_iters = 200
     n_embd = 128
     n_head = 3
     n_layer = 3
-    dropout = 0.1
+    dropout = 0.05
 
 # Hyperparameters set 3
 if args.parameters == 3:
-    batch_size = 64
-    block_size = 256
-    max_iters = 3000
-    eval_interval = 300
+    batch_size = 128
+    block_size = 32
+    max_iters = 500
+    eval_interval = 50
     learning_rate = 2e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     eval_iters = 500
     n_embd = 172
     n_head = 2
     n_layer = 2
-    dropout = 0.1
+    dropout = 0.05
+
+def add_noise(data, chars):
+    augmented = []
+    for char in data:
+        if torch.rand(1).item() < 0.2:
+            continue 
+        augmented.append(char)
+        if torch.rand(1).item() < 0.2:
+            augmented.append(stoi[chars[torch.randint(len(chars), (1,)).item()]])
+    return torch.tensor(augmented, dtype=torch.long)
+
+def pattern_stretch_shrink(data):
+    stretched = []
+    for char in data:
+        repeats = torch.ceil(torch.tensor(1.5)).int().item()
+        stretched.extend([char] * repeats)
+    return torch.tensor(stretched[:len(data)], dtype=torch.long)
     
 torch.manual_seed(1337)
 
@@ -98,6 +115,8 @@ decode = lambda l: ''.join([itos[i] for i in l]) # decoder: take a list of integ
 
 # Train and test splits
 data = torch.tensor(encode(text), dtype=torch.long)
+data = torch.cat((data, add_noise(data, chars), pattern_stretch_shrink(data)))
+
 n = int(0.9*len(data)) # first 90% will be train, rest val
 train_data = data[:n]
 val_data = data[n:]
@@ -190,6 +209,8 @@ class Block(nn.Module):
     def __init__(self, n_embd, n_head):
         # n_embd: embedding dimension, n_head: the number of heads we'd like
         super().__init__()
+        self.conv1 = nn.Conv1d(in_channels=n_embd, out_channels=n_embd, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv1d(in_channels=n_embd, out_channels=n_embd, kernel_size=5, padding=2)
         head_size = n_embd // n_head
         self.sa = MultiHeadAttention(n_head, head_size)
         self.ffwd = FeedFoward(n_embd)
@@ -240,7 +261,10 @@ class GPTLanguageModel(nn.Module):
             B, T, C = logits.shape
             logits = logits.view(B*T, C)
             targets = targets.view(B*T)
-            loss = F.cross_entropy(logits, targets)
+            if args.data_type != 'timing':
+                loss = F.cosine_embedding_loss(logits, F.one_hot(targets, num_classes=vocab_size).float(), torch.ones(logits.size(0), device=device))
+            else:
+                loss = F.cross_entropy(logits, targets)
 
         return logits, loss
 
@@ -253,31 +277,19 @@ class GPTLanguageModel(nn.Module):
             logits, loss = self(idx_cond)
             # focus only on the last time step
             logits = logits[:, -1, :] # becomes (B, C)
+            
+            # Add temperature to the logits
+            logits /= 2
+            
             # apply softmax to get probabilities
             probs = F.softmax(logits, dim=-1) # (B, C)
             # sample from the distribution
             idx_next = torch.multinomial(probs, num_samples=1) # (B, 1)
+            idx_next = torch.clamp(idx_next, 0, vocab_size - 1)
             # append sampled index to the running sequence
             idx = torch.cat((idx, idx_next), dim=1) # (B, T+1)
         return idx
-    
-def get_pitch():
-    pitch_data = data
-    pitch_data = torch.unique_consecutive(pitch_data)
-    return pitch_data
-    
-def get_timing():
-    timing_data = data
-    timing_data = torch.zeros_like(data)
-    count = 1
-    for i in range(1, len(data)):
-        if data[i] == data[i - 1]:
-            count += 1
-        else:
-            timing_data[i - count:i] = count
-            count = 1
-    timing_data[-count:] = count
-    return timing_data
+
 
 if args.no_train == None:    
     model = GPTLanguageModel()
@@ -338,8 +350,8 @@ if args.no_train == None:
     # generate from the model
     context = torch.zeros((1, 1), dtype=torch.long, device=device)
     if args.melody_path != None:
-        generated_text = decode(m.generate(context, max_new_tokens=500)[0].tolist())
-        print(generated_text)
+        generated_text = decode(m.generate(context, max_new_tokens=5000)[0].tolist())
+        # print(generated_text)
         with open(args.melody_path, 'w') as f:
             f.write(generated_text)
 
