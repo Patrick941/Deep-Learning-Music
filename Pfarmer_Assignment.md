@@ -104,6 +104,30 @@ The character distribution metric was calculated by taking the distance between 
 
 A baseline model was also created to compare the models against. The baseline model was a simple model that would predict the most common character with the most common sequence length, which happened to be 'f'.
 
+Taking first the recall comparison. We get the below chart:(higher is better)\
+![Figure 1](<images/Pattern Recall.png>)\
+Most of the models are close to each other but the best 2 results are both using the first set of hyperparameters with the better of the two being the model that was trained on pitch only first. This is because the model was able to capture the patterns in the dataset better. We do see however that some of the models fell apart to give a very low recall. In the case of the fine-tune parameter 3 that is because the model is just predicted the 1 character for the entire output very similarly to the baseline model. We also see that the simple model 1 for the separate model approach performed very poorly. This is because the model was able to capture the pitch with a simple model but not catch the timing, the result of this is it predicted very long notes which was very off rhythm.
+
+For the precision comparison we get the below chart:(higher is better)\
+![Figure 2](<images/Pattern Precision.png>)\
+The precision tells use very little as almost all of the models have a precision between 0.9 and 1. That is because the model has a low temperature and is unlikely to produce false positives and would be more likely to produce false negatives. We only see here the fine-tune model 3 has a precision of 1 due to the model predicting just the one character.
+
+For the F1-score comparison we get the below chart:(higher is better)\
+![Figure 3](<images/Pattern F1 Score.png>)\
+The F1-score is a combination of the precision and recall. We just saw above that the precision is almost entirely the same which is why our F1-score graph very closely reflects the recall graph. Due to the unaugmented model having a slightly better precision than the fine-tune models they close the gap slightly in the F1-score but the fine-tune model approach still has the best F1-score.
+
+For the character distribution distance comparison we get the below chart:(lower is better)\
+![Figure 4](<images/Character Distribution Distance.png>)\
+The character distribution distance is mainly a sanity check that shows if a model is completely off mark and we can see this with the fine-tune model 3 and the baseline model. The baseline model and fine-tune model 3 having the same character distribution distance is because they are both predicting the same character for the entire output. We can see that the separate model 1 has a normal distance and this is because it was able to capture the pitch but not the timing.
+
+For the pattern length distribution distance comparison we get the below chart:(lower is better)\
+![Figure 5](<images/Pattern Length Distribution Distance.png>)\
+The pattern length distribution distance is a metric to show if the model is capturing the timing correctly. As predicted above the separate model 1 has a very high distance as it was unable to capture the timing correctly. We can also see that the baseline model is not massively off. This is due to the model predicting the most common sequence length which was 1. This is an example of why we need to use multiple metrics to evaluate a model.
+
+For the pattern distribution distance comparison we get the below chart:(lower is better)\
+![Figure 6](<images/Pattern Distribution Distance.png>)\
+The pattern distribution distance is a metric to show if the model is capturing the patterns in the dataset. We can see that the same models shown to be performing well in the f1-score metric are also performing well here. This is because both metrics are comparing similar things but the pattern distribution distance also takes into account the count of the patterns occurring in the dataset. Due to this data being very repetitive most models are generating the patterns at the correct frequency so the metric gives similar results to the f1-score for this reason. It could for another dataset provide a more useful insight though.
+
 
 # Part 2
 
