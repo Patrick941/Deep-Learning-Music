@@ -3,7 +3,7 @@ basepath=inputs/finalAssignment_musicDataset
 
 mkdir -p temp
 
-range=6
+range=3
 
 python scripts/data_preprocess.py --path $basepath/inputMelodiesAugmented.txt --pitch-path temp/pitch.txt --timing-path temp/timing.txt --interleaved-path temp/interleaved.txt --unaltered-path temp/unaltered.txt
 

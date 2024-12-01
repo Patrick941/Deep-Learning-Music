@@ -5,6 +5,11 @@ author: "Student Name: Patrick Farmer       Student Number: 20331828"
 date: "Date: 30-11-2024"
 ---
 
+
+![](https://www.tcd.ie/media/tcd/site-assets/images/tcd-logo.png)
+
+\clearpage
+
 # Part 1
 
 ### Introduction
@@ -24,8 +29,58 @@ pitch = "CDEFGAB"
 output = "CDEFFFGAB"
 ```
 
-
 ### Machine Learning methodology
+
+The first change that was made was a change to the loss function. A combination of two loss functions was used. A weighted sum of the cosine embedding loss and the cross entropy loss. The cosine embedding loss minimises the difference between the sequence generated and the target sequence which captures the rhythm as a whole. The cross entropy loss is more specifically for the timing to capture the beat fo the rhythm. The weighting is weighted 70% cosine loss and 30% cross entropy loss.
+
+Temperature was also added to increase the creativity of the model. Temperature adjusts the smoothness of the probability distribution. A higher temperature will make the model more creative but less accurate. It is implemented by dividing the logits by the temperature before applying the softmax function. To improve the accuracy the temperature was reduced to 0.6 but if the the task for the model required more diversity a higher temperature could be used.
+
+The Hyperparameters were adjusted to fit the dataset better. The model as a whole was made much more simple as the task is a lot repetitive and structured than the previous task the gpt.py was used for. Three different sets of hyperparameters were used to compare against each other.
+
+The **first set of hyperparameters** is a very light weight set of parameters, the model uses only 490 parameters. The hyperparameters are as follows:
+
+```
+batch_size = 64         # The batch size was kept large as it keeps the convergence stable
+block_size = 4          # The block size was reduced to 4 as the patterns are very localised. This would not capture the larger patterns and this will be compared with the other models
+max_iters = 20          # The max iterations was reduced to 20 as the model converged very quickly
+eval_interval = 2       # The evaluation interval was reduced to 2 as the model converged quickly
+learning_rate = 1e-4    # The learning rate was kept low as the model is simple
+eval_iters = 1          # The evaluation iterations was reduced to 1 as the model converged quickly
+n_embd = 8              # The number of embeddings was kept very low as there was not overly complex patterns in the dataset
+n_head = 1              # The number of heads was kept low as there was not overly complex relationships between tokens in the dataset
+n_layer = 1             # The number of layers was kept small as the dataset was simple and could easily be overfit
+dropout = 0.1           # The dropout was set low as there was a large amount of data and the model was simple so it is not likely to overfit
+```
+
+The **second set of hyperparameters** was slightly more complex and allowed for the same heavy localisation focus but allowed more complex patterns and relationships to be captured. The model still had a reasonably small parameter count at 20,000. The model was also run for a few more iterations. The hyperparameters are as follows:
+
+```
+batch_size = 64         # The batch size was kept large as it keeps the convergence stable    
+block_size = 4          # The block size was kept at 4 to mirror the local focus in the first model    
+max_iters = 100         # The max iterations was increased to 100 as the model was more complex    
+eval_interval = 10      # The evaluation interval was increased to 10 as the model was more complex        
+learning_rate = 1e-4    # The learning rate was kept low as the model is still relatively simple            
+eval_iters = 10         # The evaluation iterations was increased to 10 as the model was more complex    
+n_embd = 32             # The number of embeddings was increased to 32 to capture more complex patterns
+n_head = 4              # The number of heads was increased to 4 to capture more complex relationships between tokens
+n_layer = 1             # The number of layers was kept small as the dataset was simple and could easily be overfit
+dropout = 0.1           # The dropout was set low as there was a large amount of data and the model was simple so it is not likely to overfit    
+```
+
+The **third set of hyperparameters** was the most complex, it tested how the model would perform if it was allowed to capture bigger patterns in addition to more complex patterns. This model has a parameter count of 40,000. The hyperparameters are as follows:
+
+```
+batch_size = 64         # The batch size was kept large as it keeps the convergence stable      
+block_size = 32         # The block size was increased to 32 to capture larger patterns    
+max_iters = 400         # The max iterations was increased to 400 as the model was more complex    
+eval_interval = 40      # The evaluation interval was increased to 40 as the model was more complex        
+learning_rate = 1e-4    # The learning rate was kept low as the model is still relatively simple            
+eval_iters = 40         # The evaluation iterations was increased to 40 as the model was more complex    
+n_embd = 32             # The number of embeddings was increased to 32 to capture more complex patterns
+n_head = 4              # The number of heads was increased to 4 to capture more complex relationships between tokens
+n_layer = 2             # The number of layers was increased to 2 to capture more complex patterns
+dropout = 0.1           # The dropout was set low as there was a large amount of data and the model was simple so it is not likely to overfit    
+```
 
 ### Evaluation
 

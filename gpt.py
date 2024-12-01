@@ -36,7 +36,7 @@ n_layer = 6
 dropout = 0.2
 
 # Hyperparameters set 1
-if args.parameters == 1:
+if args.parameters == 6:
     batch_size = 128
     block_size = 16
     max_iters = 500
@@ -51,7 +51,7 @@ if args.parameters == 1:
 # ------------
 
 # Hyperparameters set 2
-if args.parameters == 2:
+if args.parameters == 5:
     batch_size = 128
     block_size = 64
     max_iters = 500
@@ -65,7 +65,7 @@ if args.parameters == 2:
     dropout = 0.05
 
 # Hyperparameters set 3
-if args.parameters == 3:
+if args.parameters == 4:
     batch_size = 128
     block_size = 32
     max_iters = 500
@@ -79,49 +79,49 @@ if args.parameters == 3:
     dropout = 0.05
     
 # Hyperparameters set 4
-if args.parameters == 4:
-    batch_size = 32
-    block_size = 8
-    max_iters = 100
-    eval_interval = 10
+if args.parameters == 1:
+    batch_size = 64
+    block_size = 4
+    max_iters = 20
+    eval_interval = 2
     learning_rate = 1e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 10
-    n_embd = 64
-    n_head = 2
-    n_layer = 2
+    eval_iters = 1
+    n_embd = 8
+    n_head = 1
+    n_layer = 1
     dropout = 0.1
     
 # Hyperparameters set 5
-if args.parameters == 5:
-    batch_size = 16
-    block_size = 32
-    max_iters = 100
-    eval_interval = 10
-    learning_rate = 1e-4
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 10
-    n_embd = 64
-    n_head = 2
-    n_layer = 2
-    dropout = 0.1
-    
-# Hyperparameters set 6
-if args.parameters == 6:
-    batch_size = 8
-    block_size = 16
+if args.parameters == 2:
+    batch_size = 64
+    block_size = 4
     max_iters = 100
     eval_interval = 10
     learning_rate = 1e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     eval_iters = 10
     n_embd = 32
-    n_head = 1
+    n_head = 4
     n_layer = 1
     dropout = 0.1
     
+# Hyperparameters set 6
+if args.parameters == 3:
+    batch_size = 64
+    block_size = 32
+    max_iters = 400
+    eval_interval = 40
+    learning_rate = 1e-4
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    eval_iters = 40
+    n_embd = 32
+    n_head = 4
+    n_layer = 2
+    dropout = 0.1
+    
 if args.data_type == "fine_tune":
-    learning_rate *= 3
+    learning_rate *= 2
 
 def add_noise(data, chars):
     augmented = []
@@ -338,7 +338,12 @@ class GPTLanguageModel(nn.Module):
             B, T, C = logits.shape
             logits = logits.view(B*T, C)
             targets = targets.view(B*T)
-            loss = F.cross_entropy(logits, targets)
+            if args.data_type != 'timing':
+                loss_a = F.cosine_embedding_loss(logits, F.one_hot(targets, num_classes=vocab_size).float(), torch.ones(logits.size(0), device=device))
+                loss_b = F.cross_entropy(logits, targets)
+                loss = loss_a * 0.7 + loss_b * 0.3
+            else:
+                loss = F.cross_entropy(logits, targets)
 
         return logits, loss
 
@@ -353,7 +358,7 @@ class GPTLanguageModel(nn.Module):
             logits = logits[:, -1, :] # becomes (B, C)
             
             # Add temperature to the logits
-            logits /= 1.25
+            logits /= 0.3
             
             # apply softmax to get probabilities
             probs = F.softmax(logits, dim=-1) # (B, C)
