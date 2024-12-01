@@ -1,6 +1,3 @@
-import warnings
-warnings.filterwarnings("ignore")
-
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
@@ -8,7 +5,6 @@ from torch.nn import Parameter
 import sys
 import argparse
 import os
-import warnings
 
 parser = argparse.ArgumentParser(description='GPT Language Model')
 parser.add_argument('--path', type=str, help='Path to the input file')
@@ -41,35 +37,49 @@ dropout = 0.2
 
 # Hyperparameters set 1
 if args.parameters == 1:
-    batch_size = 32
-    block_size = 4
-    max_iters = 100
-    eval_interval = 10
-    learning_rate = 1e-4
+    batch_size = 128
+    block_size = 16
+    max_iters = 500
+    eval_interval = 50
+    learning_rate = 2e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 5
-    n_embd = 32
-    n_head = 1
-    n_layer = 1
+    eval_iters = 20
+    n_embd = 128
+    n_head = 4 
+    n_layer = 4 
     dropout = 0.05
 # ------------
 
 # Hyperparameters set 2
 if args.parameters == 2:
-    batch_size = 32
-    block_size = 16
-    max_iters = 100
-    eval_interval = 10
-    learning_rate = 1e-4
+    batch_size = 128
+    block_size = 64
+    max_iters = 500
+    eval_interval = 50
+    learning_rate = 2e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 5
-    n_embd = 32
-    n_head = 1
-    n_layer = 1
+    eval_iters = 20
+    n_embd = 128
+    n_head = 3
+    n_layer = 3
     dropout = 0.05
 
 # Hyperparameters set 3
 if args.parameters == 3:
+    batch_size = 128
+    block_size = 32
+    max_iters = 500
+    eval_interval = 50
+    learning_rate = 2e-4
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    eval_iters = 50
+    n_embd = 172
+    n_head = 2
+    n_layer = 2
+    dropout = 0.05
+    
+# Hyperparameters set 4
+if args.parameters == 4:
     batch_size = 32
     block_size = 8
     max_iters = 100
@@ -78,56 +88,40 @@ if args.parameters == 3:
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     eval_iters = 10
     n_embd = 64
-    n_head = 1
-    n_layer = 1
-    dropout = 0.05
-    
-# Hyperparameters set 4
-if args.parameters == 4:
-    batch_size = 8
-    block_size = 2
-    max_iters = 50
-    eval_interval = 5
-    learning_rate = 5e-5
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 5
-    n_embd = 16
-    n_head = 1
-    n_layer = 1
-    dropout = 0.05
+    n_head = 2
+    n_layer = 2
+    dropout = 0.1
     
 # Hyperparameters set 5
 if args.parameters == 5:
-    batch_size = 4
-    block_size = 8
-    max_iters = 50
-    eval_interval = 5
-    learning_rate = 5e-5
+    batch_size = 16
+    block_size = 32
+    max_iters = 100
+    eval_interval = 10
+    learning_rate = 1e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 5
-    n_embd = 16
-    n_head = 1
-    n_layer = 1
-    dropout = 0.05
+    eval_iters = 10
+    n_embd = 64
+    n_head = 2
+    n_layer = 2
+    dropout = 0.1
     
 # Hyperparameters set 6
 if args.parameters == 6:
-    batch_size = 2
-    block_size = 4
-    max_iters = 50
-    eval_interval = 5
-    learning_rate = 5e-5
+    batch_size = 8
+    block_size = 16
+    max_iters = 100
+    eval_interval = 10
+    learning_rate = 1e-4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    eval_iters = 5
-    n_embd = 8
+    eval_iters = 10
+    n_embd = 32
     n_head = 1
     n_layer = 1
-    dropout = 0.05
-
-
+    dropout = 0.1
     
 if args.data_type == "fine_tune":
-    learning_rate *= 0.5
+    learning_rate *= 3
 
 def add_noise(data, chars):
     augmented = []
@@ -141,10 +135,39 @@ def add_noise(data, chars):
 
 def pattern_stretch_shrink(data):
     stretched = []
-    for char in data:
-        repeats = torch.ceil(torch.tensor(1.5)).int().item()
-        stretched.extend([char] * repeats)
-    return torch.tensor(stretched[:len(data)], dtype=torch.long)
+    patterns = {}
+    pattern_length = 2
+    for i in range(len(data)):
+        if i != len(data) - 1:
+            pattern = data[i:i + pattern_length - 1]
+            if pattern in patterns:
+                patterns[pattern] += 1
+            else:
+                patterns[pattern] = 1
+    
+    pattern_sum = sum(patterns.values())        
+    pattern_avg = pattern_sum / len(patterns)
+    patterns_to_remove = []
+    for pattern in patterns:
+        if patterns[pattern] < pattern_avg:
+            patterns_to_remove.append(pattern)
+    for pattern in patterns_to_remove:
+        patterns.pop(pattern)
+        
+    for i in range(len(data)):
+        stretched.append(data[i])
+        if i != len(data) - 1:
+            pattern = data[i:i + pattern_length - 1]
+            if pattern in patterns:
+                stretched.append(data[i + 1])
+                stretched.append(data[i])
+            
+    return stretched
+    
+    
+        
+        
+        
     
 torch.manual_seed(1337)
 
@@ -154,6 +177,8 @@ input_file = args.path
 
 with open(input_file, 'r', encoding='utf-8') as f:
     text = f.read()
+
+text = pattern_stretch_shrink(text)
 
 # here are all the unique characters that occur in this text
 chars = sorted(list(set(text)))
@@ -166,7 +191,8 @@ decode = lambda l: ''.join([itos[i] for i in l]) # decoder: take a list of integ
 
 # Train and test splits
 data = torch.tensor(encode(text), dtype=torch.long)
-data = torch.cat((data, add_noise(data, chars), pattern_stretch_shrink(data)))
+data = torch.cat((data, add_noise(data, chars)))
+# data = torch.cat((data, add_noise(data, chars)))
 
 n = int(0.9*len(data)) # first 90% will be train, rest val
 train_data = data[:n]

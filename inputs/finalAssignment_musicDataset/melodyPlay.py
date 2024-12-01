@@ -66,7 +66,7 @@ def create_sequence(note_sequence, duration_ms=500):
 # Example sequence (You can replace this with your sequence)
 #sequence = "C C G G A A G F F E E D D C G G F F E E D G G F F E E D C C G G A A G F F E E D D C".split()
 # Read the sequence from melody_best.txt
-with open('melody_best.txt', 'r') as file:
+with open('inputMelodiesAugmented.txt', 'r') as file:
     sequence = file.read().replace('\n', '')
 
 # Create the sequence
