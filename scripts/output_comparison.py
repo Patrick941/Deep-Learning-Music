@@ -83,6 +83,7 @@ with open(args.truth, 'r') as file:
                 truth_freq = truth_char_distribution.get(char, 0)
                 model_freq = model_char_distribution.get(char, 0)
                 char_distance += abs(truth_freq - model_freq)
+            char_distance /= len(truth_char_distribution)
                 
             pattern_distance = 0
             model_patterns = get_patterns(model_data)
@@ -90,6 +91,7 @@ with open(args.truth, 'r') as file:
                 truth_freq = truth_patterns.get(pattern, 0)
                 model_freq = model_patterns.get(pattern, 0)
                 pattern_distance += abs(truth_freq - model_freq)
+            pattern_distance /= len(truth_patterns)
                 
             lengths_distance = 0
             model_sequence_lengths = get_sequence_lengths(model_data)
@@ -97,6 +99,7 @@ with open(args.truth, 'r') as file:
                 truth_freq = truth_sequence_lengths.get(length, 0)
                 model_freq = model_sequence_lengths.get(length, 0)
                 lengths_distance += abs(truth_freq - model_freq)
+            lengths_distance /= len(truth_sequence_lengths)
                 
             pattern_count = 0
             for pattern in truth_patterns:
