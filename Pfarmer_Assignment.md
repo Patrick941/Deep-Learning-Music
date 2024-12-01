@@ -142,6 +142,12 @@ An ROC curve plots the True Positive Rate against the False Positive Rate at dif
 
 ### Give two examples of situations where a linear regression would give inaccurate predictions. Explain your reasoning and what possible solutions you would adopt in each situation.
 
+Linear Regression is as the name suggests suited for linear relationships. When there is a non-linear relationship between variables linear regression will give inaccurate predictions. For example for some data with a quadratic relationship the linear regression will separate the data into two groups by drawing a line through the middle of the data that does not in any way capture the relationship between the variables.\
+Linear Regression is also not suited for data with a high amount of noise, specifically outliers as the model will try to fit the line to the outliers. This can be solved with pre-requisite data cleaning but without additional help Linear Regression will perform poorly on this data.
+
 ### The term 'kernel' has different meanings in SVM and CNN models. Explain the two different meanings. Discuss why and when the use of SVM kernels and CNN kernels is useful, as well as mentioning different types of kernels.
+
+In an SVM (Support Vector Machine) a kernel refers to a function that transforms the data into a higher dimensional space that allows enables the SVM to find a hyperplane that does a better job at separating the data. This is useful as it allows the SVM to find more complex patterns in the data. A couple examples of kernels are the RBF kernel and the sigmoid kernel.\
+In a CNN (Convolutional Neural Network) a kernel is a matrix that is used to perform convolution on the input data. The kernel may be used to find edges, smooth an image or in larger networks to find more complex patterns such as faces. A couple examples of kernels are the Sobel kernel (for finding edges) and the Gaussian kernel (for smoothing an image).
 
 ### In k-fold cross-validation, a dataset is resampled multiple times. What is the idea behind this resampling i.e. why does resampling allow us to evaluate the generalisation performance of a machine learning mode. Give a small example to illustrate. Discuss when it is and it is not appropriate to use k-fold cross-validation.
