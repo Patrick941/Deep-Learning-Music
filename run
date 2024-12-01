@@ -49,6 +49,8 @@ for melody in $melodies; do
     done
 done
 
+output_files="$output_files $basepath/baseline_melody_no_aug_1.txt"
+
 
 echo "python scripts/output_comparison.py --truth temp/unaltered.txt --outputs $output_files --output-csv Logs/output_comparison.csv"
 

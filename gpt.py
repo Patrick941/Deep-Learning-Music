@@ -117,7 +117,7 @@ if args.parameters == 3:
     eval_iters = 40
     n_embd = 32
     n_head = 4
-    n_layer = 2
+    n_layer = 1
     dropout = 0.1
     
 if args.data_type == "fine_tune":
@@ -441,13 +441,15 @@ if args.no_train == None:
     most_frequent_char = max(set(text), key=text.count)
     most_frequent_char_idx = stoi[most_frequent_char]
     
-    baseline_path = args.melody_path.replace('.txt', '_baseline.txt')
+    melody_path = args.melody_path
+    melody_leaf = melody_path.split('/')[-1]
+    melody_leaf = 'baseline_' + melody_leaf
+    baseline_path = os.path.join('/'.join(melody_path.split('/')[:-1]), melody_leaf)
 
     with open(baseline_path, 'w') as f:
         baseline_context = torch.zeros((1, 1), dtype=torch.long, device=device).fill_(most_frequent_char_idx)
         baseline_generated_text = decode([baseline_context.squeeze().item()])
-        with open(args.melody_path.replace('.txt', '_baseline.txt'), 'w') as f:
-            f.write(baseline_generated_text)
+        f.write(baseline_generated_text)
 
 
 
